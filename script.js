@@ -980,17 +980,19 @@ $('requestForm').onsubmit =
         : {};
 
 
-    if (
-      (profile.role || 'user')
-      !== 'user'
-    ) {
+      // Allow both customers and service providers
+const requesterRole = profile.role || 'user';
 
-      alert(
-        'Service Provider accounts cannot send customer requests.'
-      );
+if (!['user', 'worker'].includes(requesterRole)) {
+  alert('Your account type cannot send service requests.');
+  return;
+}
 
-      return;
-    }
+// Prevent sending a request to your own profile
+if (selectedWorker.id === user.uid) {
+  alert('You cannot send a service request to your own profile.');
+  return;
+}
 
 
     try {
@@ -1026,25 +1028,31 @@ $('requestForm').onsubmit =
             user.uid,
 
 
-          customerSnapshot: {
+          customerId: user.uid,
 
-            name:
-              profile.name ||
-              user.email ||
-              'Customer',
+customerRole: requesterRole,
 
-            phone:
-              profile.phone || '',
+customerSnapshot: {
 
-            email:
-              profile.email ||
-              user.email ||
-              '',
+  name:
+    profile.name ||
+    user.email ||
+    'Customer',
 
-            location:
-              profile.location || ''
+  phone:
+    profile.phone || '',
 
-          },
+  email:
+    profile.email ||
+    user.email ||
+    '',
+
+  location:
+    profile.location || '',
+
+  role: requesterRole
+
+},
 
 
           serviceType:
@@ -1151,10 +1159,15 @@ async function loadCustomerRequests() {
   const profileSnap = await getDoc(doc(db, 'users', user.uid));
   const profile = profileSnap.exists() ? profileSnap.data() : {};
 
-  if ((profile.role || 'user') !== 'user') {
-    customerRequestsSection.classList.add('hidden');
-    return;
-  }
+  // Both customers and service providers can view
+// the requests they personally submitted.
+
+if (!['user', 'worker'].includes(profile.role || 'user')) {
+  customerRequestsSection.classList.add('hidden');
+  return;
+}
+
+customerRequestsSection.classList.remove('hidden');
 
   customerRequestsSection.classList.remove('hidden');
   customerRequestsList.innerHTML =
@@ -2476,8 +2489,11 @@ async function updateNavbarForLoggedInUser(
 
     );
 
-  if (role === 'user') await loadCustomerRequests();
-  else customerRequestsSection?.classList.add('hidden');
+  if (role === 'user' || role === 'worker') {
+  await loadCustomerRequests();
+} else {
+  customerRequestsSection?.classList.add('hidden');
+}
 }
 
 

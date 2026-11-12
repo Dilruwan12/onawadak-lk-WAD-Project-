@@ -92,6 +92,13 @@ function renderRequests() {
   $('requestsList').innerHTML = list.map(r => {
     const status = r.status || 'pending';
     const customer = r.customerSnapshot || {};
+    const requesterRole =
+  customer.role || r.customerRole || 'user';
+
+const requesterType =
+  requesterRole === 'worker'
+    ? '🔧 Service Provider'
+    : '👤 Customer';
     const paidAmount = Number(r.paymentAmount ?? r.amount ?? 0);
 
     let actions =
@@ -118,7 +125,9 @@ function renderRequests() {
           <div>
             <div class="request-title">${escapeHtml(r.serviceType || 'Service Request')}</div>
             <div class="request-meta">
-              From ${escapeHtml(customer.name || 'Customer')} • ${formatDate(r.createdAt)}
+              From ${escapeHtml(customer.name || 'User')}
+• ${requesterType}
+• ${formatDate(r.createdAt)}
             </div>
           </div>
           <span class="status ${status}">${escapeHtml(status)}</span>
@@ -245,7 +254,15 @@ $('completeJobForm').addEventListener('submit', async event => {
 
 function openCustomer(r) {
   const c = r.customerSnapshot || {};
-  $('customerName').textContent = c.name || 'Customer';
+  const requesterRole =
+  c.role || r.customerRole || 'user';
+
+const requesterType =
+  requesterRole === 'worker'
+    ? 'Service Provider'
+    : 'Customer';
+  $('customerName').textContent =
+  `${c.name || 'User'} (${requesterType})`;
   $('customerPhone').textContent = c.phone || 'Not provided';
   $('customerEmail').textContent = c.email || 'Not provided';
   $('customerLocation').textContent = c.location || r.location || 'Not specified';
