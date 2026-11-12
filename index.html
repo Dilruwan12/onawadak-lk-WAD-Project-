@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ONAWADAK | Find Help Near You</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIINfQ3K0jG6H3k4Y7Q6Y5e1f9p8x7m6n5o="
+        crossorigin=""/>
+  <link rel="stylesheet" href="provider-profile.css">
+</head>
+<body>
+  <header class="navbar">
+    <a href="index.html" class="logo">
+    <img src="onawadak logo.png" alt="Onawadak.lk Logo">
+</a>
+    <nav>
+      <a href="#services">Services</a>
+      <a href="#nearby">Nearby</a>
+      <a href="#how">How It Works</a>
+    </nav>
+    
+    <div class="nav-actions" id="navActions">
+      <!-- Keep the existing Login / Register UI exactly as before -->
+      <div id="loggedOutActions" class="logged-out-actions">
+        <button class="btn btn-light" id="loginBtn">Login</button>
+        <button class="btn btn-primary" id="registerBtn">Register</button>
+      </div>
+
+      <!-- This appears only after a successful login/register -->
+      <div id="loggedInActions" class="user-menu hidden">
+        <button type="button" class="user-name-btn" id="userNameBtn" aria-expanded="false">
+          👤 <span id="navUserName">User</span> <span class="user-arrow">▾</span>
+        </button>
+
+        <div class="user-dropdown hidden" id="userDropdown">
+          <div class="user-info">
+            <strong id="dropdownUserName">User</strong>
+            <small id="dropdownUserRole">👤 Customer</small>
+          </div>
+
+          <a href="provider-profile.html" id="providerProfileLink" class="hidden">
+            👤 My Profile
+          </a>
+
+          <button type="button" class="logout-menu-btn" id="homeLogoutBtn">
+            🚪 Logout
+          </button>
+        </div>
+      </div>
+    </div>
+    <button class="menu-btn" id="menuBtn">☰</button>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-content">
+        <span class="badge">🇱🇰 Local help, when you need it</span>
+        <h1>Need help?<br><span>Find it nearby.</span></h1>
+        <p>Find trusted mechanics, electricians, plumbers, towing services and other local workers around your current location.</p>
+
+        <div class="search-box">
+          <span>🔎</span>
+          <input id="serviceSearch" type="text" placeholder="What service do you need?">
+          <button id="findHelpBtn" class="btn btn-primary">Find Help</button>
+        </div>
+
+        <button id="locationBtn" class="location-btn">📍 Use My Current Location</button>
+        <p id="locationStatus" class="location-status"></p>
+      </div>
+
+   <div class="hero-card slider">
+
+  <!-- SLIDE 1 - POST -->
+  <div class="slide active">
+    <img src="onawadak p1.jpg" alt="Onawadak Post 1">
+  </div>
+
+  <!-- SLIDE 2 - EMERGENCY HELP -->
+  <div class="slide emergency-slide">
+
+    <div class="emergency-icon">🚨</div>
+
+    <h3>Emergency Help</h3>
+
+    <p>
+      Vehicle broken down?
+      Find an available provider near you.
+    </p>
+
+    <div class="emergency-grid">
+
+      <button data-service="Mechanic">
+        🔧 Mechanic
+      </button>
+
+      <button data-service="Towing">
+        🚛 Towing
+      </button>
+
+      <button data-service="Battery">
+        🔋 Battery
+      </button>
+
+      <button data-service="Tyre Repair">
+        🛞 Tyre Repair
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- SLIDE 3 - POST -->
+  <div class="slide">
+    <img src="onawadak p2.jpg" alt="Onawadak Post 2">
+  </div>
+
+  <!-- SLIDE 4 - POST -->
+  <div class="slide">
+    <img src="onawadak p3.jpg" alt="Onawadak Post 3">
+  </div>
+
+
+  <!-- SLIDER DOTS -->
+
+  <div class="slider-dots">
+
+    <span class="dot active-dot"></span>
+
+    <span class="dot"></span>
+
+    <span class="dot"></span>
+
+    <span class="dot"></span>
+
+  </div>
+
+</div>
+
+  <!-- Slider dots -->
+  <div class="slider-dots">
+    <span class="dot active-dot"></span>
+    <span class="dot"></span>
+    <span class="dot"></span>
+  </div>
+
+</div>
+    </section>
+
+    <section id="services" class="section">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">SERVICES</span>
+          <h2>What do you need?</h2>
+        </div>
+        <p>Choose a service and discover providers near you.</p>
+      </div>
+      <div class="service-grid" id="serviceGrid"></div>
+    </section>
+
+    <section id="nearby" class="section nearby-section">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">NEARBY</span>
+          <h2>Service providers near you</h2>
+        </div>
+        <select id="radiusSelect">
+          <option value="10" selected>Within 10 km</option>
+          <option value="25">Within 25 km</option>
+          <option value="50">Within 50 km</option>
+        </select>
+      </div>
+
+      <div class="nearby-layout">
+        <div id="workerList" class="worker-list"></div>
+        <div id="map" class="map"></div>
+      </div>
+    </section>
+
+    <section id="myRequests" class="section customer-requests-section hidden">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">MY REQUESTS</span>
+          <h2>Track your service requests</h2>
+        </div>
+        <button type="button" class="btn btn-light" id="refreshCustomerRequests">Refresh</button>
+      </div>
+      <div id="customerRequestsList" class="customer-requests-list"></div>
+    </section>
+
+    <section id="how" class="section how-section">
+      <div class="section-heading centered">
+        <span class="eyebrow">HOW IT WORKS</span>
+        <h2>Get help in 3 simple steps</h2>
+      </div>
+      <div class="steps">
+        <div class="step"><b>01</b><div>📍</div><h3>Share location</h3><p>Allow location access so we can find nearby providers.</p></div>
+        <div class="step"><b>02</b><div>🔎</div><h3>Choose a service</h3><p>Select the service you need and compare available workers.</p></div>
+        <div class="step"><b>03</b><div>🤝</div><h3>Request help</h3><p>Contact a provider and get your problem solved.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="logo"><span>⚡</span> Onawadak.lk</div>
+    <p>Connecting people with trusted local services.</p>
+    <small>© 2026 Onawadak.lk.</small>
+  </footer>
+
+<!-- Authentication Modal -->
+  <div class="modal hidden" id="authModal">
+    <div class="modal-card auth-card">
+      <button class="close-btn" id="closeModal">×</button>
+
+      <div class="modal-logo">⚡ Onawadak.lk</div>
+
+      <!-- STEP 1: Select account type -->
+      <div id="roleStep">
+        <h2>Welcome to Onawadak</h2>
+        <p>First, choose how you want to use the platform.</p>
+
+        <div class="account-choice-grid">
+          <button class="account-choice" data-role-choice="user">
+            <span class="choice-icon">👤</span>
+            <strong>Customer</strong>
+            <small>Find and request local services</small>
+          </button>
+
+          <button class="account-choice" data-role-choice="worker">
+            <span class="choice-icon">🔧</span>
+            <strong>Service Provider</strong>
+            <small>Offer your services to customers</small>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Login or Register -->
+      <div id="authChoiceStep" class="hidden">
+        <button type="button" class="back-btn" id="backToRole">← Change account type</button>
+        <h2 id="roleStepTitle">Customer Account</h2>
+        <p id="roleStepSubtitle">Choose an option to continue.</p>
+
+        <div class="auth-action-grid">
+          <button type="button" class="auth-action" id="chooseLogin">
+            <span>🔐</span>
+            <strong>Login</strong>
+            <small>Already have an account?</small>
+          </button>
+
+          <button type="button" class="auth-action primary-action" id="chooseRegister">
+            <span>📝</span>
+            <strong>Register</strong>
+            <small>Create a new account</small>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Login / Register -->
+      <div id="authFormStep" class="hidden">
+        <button type="button" class="back-btn" id="backToAuthChoice">← Back</button>
+        <h2 id="modalTitle">Login</h2>
+        <p id="modalSubtitle">Enter your account details.</p>
+
+        <form id="authForm">
+          <div id="nameField">
+            <label for="nameInput">Full name</label>
+            <input id="nameInput" type="text" placeholder="Full name">
+          </div>
+
+          <div>
+            <label for="emailInput">Email address</label>
+            <input id="emailInput" type="email" placeholder="Email address" required>
+          </div>
+
+          <div id="phoneField">
+            <label for="phoneInput">Phone number</label>
+            <input id="phoneInput" type="tel" placeholder="Phone number">
+          </div>
+
+          <!-- Service Provider only -->
+          <div id="providerFields" class="hidden provider-fields">
+            <label for="serviceTypeInput">Type of service</label>
+            <select id="serviceTypeInput">
+              <option value="">Select service type</option>
+              <option>Mechanic</option>
+              <option>Towing</option>
+              <option>Battery</option>
+              <option>Tyre Repair</option>
+              <option>Electrician</option>
+              <option>Plumber</option>
+              <option>AC Repair</option>
+              <option>Locksmith</option>
+              <option>IT Support</option>
+              <option>Mobile Repair</option>
+              <option>Cleaning</option>
+              <option>Carpenter</option>
+              <option>Other</option>
+            </select>
+
+            <label for="locationInput">Service area / address</label>
+            <input id="locationInput" type="text" placeholder="e.g. Negombo, Kurana">
+
+            <label>Pin your exact service location on the map</label>
+            <button type="button" id="useProviderLocationBtn" class="map-location-btn">📍 Use my current location</button>
+            <div id="providerLocationMap" class="provider-location-map"></div>
+            <p id="providerLocationStatus" class="map-help">Tap the map to choose your service location.</p>
+
+            <label for="experienceInput">Experience</label>
+            <input id="experienceInput" type="text" placeholder="e.g. 5 years">
+
+            <label for="descriptionInput">Service description</label>
+            <textarea id="descriptionInput" placeholder="Tell customers about your service..."></textarea>
+          </div>
+
+          <div>
+            <label for="passwordInput">Password</label>
+            <input id="passwordInput" type="password" placeholder="Password" required>
+          </div>
+
+          <button id="authSubmitBtn" class="btn btn-primary full" type="submit">Login</button>
+        </form>
+
+        <p class="switch-auth" id="switchAuthText"></p>
+        <p class="forgot-wrap"><button type="button" id="forgotPasswordBtn" class="text-link">Forgot password?</button></p>
+        <p class="demo-note">Accounts, provider profiles and service requests are stored in Firebase.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Request Modal -->
+  <div class="modal hidden" id="requestModal">
+    <div class="modal-card">
+      <button class="close-btn" id="closeRequest">×</button>
+      <div class="modal-logo">🚨 Service Request</div>
+      <h2 id="requestWorkerName">Request Service</h2>
+      <p id="requestServiceName"></p>
+      <form id="requestForm">
+        <textarea id="problemInput" placeholder="Describe your problem..." required></textarea>
+        <button class="btn btn-primary full" type="submit">Send Request</button>
+      </form>
+    </div>
+  </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
+  <script type="module" src="script.js"></script>
+</body>
+</html>

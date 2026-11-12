@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Provider Dashboard | Onawadak.lk</title>
+    <link rel="stylesheet" href="provider-profile.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">⚡</div>
+        <div>
+          <strong>Onawadak.lk</strong>
+          <span>Service Provider Dashboard</span>
+        </div>
+      </div>
+      <a href="index.html" class="ghost-btn"> 🏠 HOME </a>
+      <div class="top-actions">
+        <span id="availabilityPill" class="availability available"
+          >● Available</span
+        >
+        <button id="profileBtn" class="ghost-btn">My Profile</button>
+        <button id="logoutBtn" class="danger-btn">Logout</button>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <section class="welcome-row">
+        <div>
+          <p class="eyebrow">PROVIDER DASHBOARD</p>
+          <h1>Welcome, <span id="providerName">Provider</span> 👋</h1>
+          <p class="muted">
+            Manage your service requests, customers, jobs and monthly revenue.
+          </p>
+        </div>
+        <button id="toggleAvailabilityBtn" class="availability-btn">
+          Set Unavailable
+        </button>
+      </section>
+
+      <section class="stats-grid">
+        <article class="stat-card">
+          <span class="stat-icon">📥</span>
+          <div>
+            <small>Pending Requests</small><strong id="pendingCount">0</strong>
+          </div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon">🔧</span>
+          <div>
+            <small>Active Jobs</small><strong id="activeCount">0</strong>
+          </div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon">✅</span>
+          <div>
+            <small>Completed Jobs</small><strong id="completedCount">0</strong>
+          </div>
+        </article>
+        <article class="stat-card revenue">
+          <span class="stat-icon">💰</span>
+          <div>
+            <small>This Month Revenue</small
+            ><strong id="monthlyRevenue">Rs. 0</strong>
+          </div>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <div class="panel requests-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Service Requests</h2>
+              <p class="muted">Accept, reject and manage customer requests.</p>
+            </div>
+            <select id="requestFilter">
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="accepted">Accepted</option>
+              <option value="completed">Completed</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div id="requestsList" class="requests-list">
+            <div class="empty">Loading requests...</div>
+          </div>
+        </div>
+
+        <aside class="side-column">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Monthly Revenue</h2>
+                <p class="muted" id="revenueMonth">Current month</p>
+              </div>
+            </div>
+            <div class="revenue-box">
+              <strong id="revenueLarge">Rs. 0</strong>
+              <span>from completed jobs</span>
+            </div>
+            <div class="mini-stats">
+              <div>
+                <span>Completed</span><strong id="revenueJobs">0</strong>
+              </div>
+              <div>
+                <span>Average / Job</span><strong id="averageJob">Rs. 0</strong>
+              </div>
+              <div>
+                <span>Total Revenue</span><strong id="totalRevenue">Rs. 0</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel quick-panel">
+            <h2>Quick Actions</h2>
+            <button id="viewProfileQuick" class="quick-btn">
+              👤 View / Edit Profile
+            </button>
+            <button id="homeBtn" class="quick-btn">
+              🏠 Back to Main Website
+            </button>
+            <button id="refreshBtn" class="quick-btn">
+              🔄 Refresh Dashboard
+            </button>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <div id="customerModal" class="modal hidden">
+      <div class="modal-card">
+        <button id="closeCustomerModal" class="modal-close">×</button>
+        <p class="eyebrow">CUSTOMER DETAILS</p>
+        <h2 id="customerName">Customer</h2>
+        <div class="customer-details">
+          <div><span>📞 Phone</span><strong id="customerPhone">-</strong></div>
+          <div><span>📧 Email</span><strong id="customerEmail">-</strong></div>
+          <div>
+            <span>📍 Location</span><strong id="customerLocation">-</strong>
+          </div>
+          <div>
+            <span>🛠️ Requested Service</span
+            ><strong id="customerService">-</strong>
+          </div>
+          <div>
+            <span>📝 Description</span
+            ><strong id="customerDescription">-</strong>
+          </div>
+          <div>
+            <span>💵 Offered / Job Amount</span
+            ><strong id="customerAmount">Rs. 0</strong>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <a id="customerCallBtn" class="primary-btn" href="#"
+            >📞 Call Customer</a
+          >
+          <a id="customerEmailBtn" class="secondary-btn" href="#"
+            >✉️ Email Customer</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <div id="completeJobModal" class="modal hidden">
+      <div class="modal-card">
+        <button id="closeCompleteJobModal" class="modal-close" type="button">×</button>
+        <p class="eyebrow">COMPLETE JOB</p>
+        <h2>Record Customer Payment</h2>
+        <p class="muted">Enter the amount the customer actually paid for this completed job.</p>
+
+        <form id="completeJobForm" class="payment-form">
+          <input type="hidden" id="completeRequestId" />
+
+          <label for="paymentAmount">Amount Paid (Rs.)</label>
+          <input
+            id="paymentAmount"
+            type="number"
+            min="0"
+            step="0.01"
+            inputmode="decimal"
+            placeholder="e.g. 2500"
+            required
+          />
+
+          <div class="modal-actions">
+            <button type="button" id="cancelCompleteJob" class="secondary-btn">Cancel</button>
+            <button type="submit" class="primary-btn">✓ Complete Job</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script type="module" src="provider-profile.js"></script>
+  </body>
+</html>
