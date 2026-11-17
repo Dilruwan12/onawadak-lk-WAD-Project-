@@ -1027,9 +1027,6 @@ if (selectedWorker.id === user.uid) {
           customerId:
             user.uid,
 
-
-          customerId: user.uid,
-
 customerRole: requesterRole,
 
 customerSnapshot: {
@@ -1166,8 +1163,6 @@ if (!['user', 'worker'].includes(profile.role || 'user')) {
   customerRequestsSection.classList.add('hidden');
   return;
 }
-
-customerRequestsSection.classList.remove('hidden');
 
   customerRequestsSection.classList.remove('hidden');
   customerRequestsList.innerHTML =
