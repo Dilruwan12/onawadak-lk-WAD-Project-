@@ -1164,8 +1164,6 @@ if (!['user', 'worker'].includes(profile.role || 'user')) {
   return;
 }
 
-customerRequestsSection.classList.remove('hidden');
-
   customerRequestsSection.classList.remove('hidden');
   customerRequestsList.innerHTML =
     '<div class="worker-empty">Loading your requests...</div>';
