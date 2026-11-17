@@ -1139,6 +1139,8 @@ customerSnapshot: {
 
           status: 'pending',
 
+          reviewSubmitted: false,
+
           createdAt:
             serverTimestamp()
 
