@@ -28,28 +28,47 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
+<<<<<<< HEAD
 
       allow read: if true;
+=======
+      allow read:
+        if resource.data.role == 'worker' ||
+        (request.auth != null && request.auth.uid == userId);
+>>>>>>> main
 
       allow create:
         if signedIn() &&
         request.auth.uid == userId;
 
+<<<<<<< HEAD
       // Account owner can update own profile.
       // Rating summary updates are limited to provider profiles.
+=======
+      // Owner may edit own profile.
+      // A logged-in customer may only change a provider's rating summary fields with valid review values.
+>>>>>>> main
       allow update:
         if signedIn() &&
         (
           request.auth.uid == userId ||
           (
             resource.data.role == 'worker' &&
+<<<<<<< HEAD
+=======
+            request.auth.uid != userId &&
+>>>>>>> main
             request.resource.data.diff(resource.data)
               .affectedKeys()
               .hasOnly(['rating', 'reviewCount']) &&
             request.resource.data.rating is number &&
             request.resource.data.rating >= 0 &&
             request.resource.data.rating <= 5 &&
+<<<<<<< HEAD
             request.resource.data.reviewCount is int &&
+=======
+            request.resource.data.reviewCount is number &&
+>>>>>>> main
             request.resource.data.reviewCount >= 0
           )
         );

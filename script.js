@@ -1047,6 +1047,81 @@ if (selectedWorker.id === user.uid) {
   return;
 }
 
+    // Ensure service provider receives location coordinates or address
+    const hasProfileLocation = Boolean(profile.location && profile.location.trim());
+    if (!userLocation && !hasProfileLocation) {
+      const allowLocation = confirm(
+        'Location Required:\n\n' +
+        'To ensure the service provider can locate and reach you, please share your location.\n\n' +
+        'Click "OK" to allow access to your current GPS location, or "Cancel" to specify your city/area manually.'
+      );
+
+      if (allowLocation) {
+        try {
+          const position = await new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+              reject(new Error('Geolocation is not supported by your browser.'));
+              return;
+            }
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 60000
+            });
+          });
+
+          userLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+
+          if (typeof map !== 'undefined' && map) {
+            if (typeof userMarker !== 'undefined' && userMarker) {
+              map.removeLayer(userMarker);
+            }
+            userMarker = L.marker([userLocation.lat, userLocation.lng])
+              .addTo(map)
+              .bindPopup('<b>📍 Your Location</b>')
+              .openPopup();
+            map.setView([userLocation.lat, userLocation.lng], 13);
+          }
+
+          if (typeof locationStatus !== 'undefined' && locationStatus) {
+            locationStatus.textContent =
+              'Location ready. Showing nearest registered providers.';
+          }
+
+          if (typeof renderWorkers === 'function' && typeof searchInput !== 'undefined') {
+            renderWorkers(searchInput.value.trim());
+          }
+        } catch (geoError) {
+          console.warn('Geolocation access failed or denied:', geoError);
+          alert('Could not access device location. Please specify your city or address manually.');
+        }
+      }
+
+      if (!userLocation) {
+        const manualLocation = prompt(
+          'Please enter your city, area, or address so the service provider knows your location:'
+        );
+
+        if (!manualLocation || !manualLocation.trim()) {
+          alert('Location required: You must allow location access or specify your city/location before submitting a service request.');
+          return;
+        }
+
+        profile.location = manualLocation.trim();
+
+        try {
+          await updateDoc(doc(db, 'users', user.uid), {
+            location: profile.location
+          });
+        } catch (profileUpdateErr) {
+          console.warn('Could not update profile location:', profileUpdateErr);
+        }
+      }
+    }
+
 
     try {
 
@@ -1077,7 +1152,12 @@ if (selectedWorker.id === user.uid) {
           },
 
 
+<<<<<<< HEAD
           customerId: user.uid,
+=======
+          customerId:
+            user.uid,
+>>>>>>> main
 
 customerRole: requesterRole,
 
@@ -1097,7 +1177,10 @@ customerSnapshot: {
     '',
 
   location:
-    profile.location || '',
+    profile.location ||
+    (userLocation
+      ? `${userLocation.lat.toFixed(6)}, ${userLocation.lng.toFixed(6)}`
+      : ''),
 
   role: requesterRole
 
@@ -1215,8 +1298,6 @@ if (!['user', 'worker'].includes(profile.role || 'user')) {
   customerRequestsSection.classList.add('hidden');
   return;
 }
-
-customerRequestsSection.classList.remove('hidden');
 
   customerRequestsSection.classList.remove('hidden');
   customerRequestsList.innerHTML =
