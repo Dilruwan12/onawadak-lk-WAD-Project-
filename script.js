@@ -1446,7 +1446,7 @@ const switchAuthText =
    AUTH UI - Full-screen Login / Register tabs
 ========================================================= */
 function openAuthModal(mode = 'login') {
-  selectedRole = 'user';
+  selectRole('user');
   providerLocation = null;
   authModal.classList.remove('hidden');
   document.body.classList.add('auth-open');
