@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ONAWADAK | Find Help Near You</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="multi-service.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,6 +13,7 @@
         integrity="sha256-p4NxAoJBhIINfQ3K0jG6H3k4Y7Q6Y5e1f9p8x7m6n5o="
         crossorigin=""/>
   <link rel="stylesheet" href="provider-profile.css">
+  <link rel="stylesheet" href="auth-ui.css">
 </head>
 <body>
   <header class="navbar">
@@ -211,95 +213,89 @@
     <small>© 2026 Onawadak.lk.</small>
   </footer>
 
-<!-- Authentication Modal -->
-  <div class="modal hidden" id="authModal">
-    <div class="modal-card auth-card">
-      <button class="close-btn" id="closeModal">×</button>
-
-      <div class="modal-logo">⚡ Onawadak.lk</div>
-
-      <!-- STEP 1: Select account type -->
-      <div id="roleStep">
-        <h2>Welcome to Onawadak</h2>
-        <p>First, choose how you want to use the platform.</p>
-
-        <div class="account-choice-grid">
-          <button class="account-choice" data-role-choice="user">
-            <span class="choice-icon">👤</span>
-            <strong>Customer</strong>
-            <small>Find and request local services</small>
-          </button>
-
-          <button class="account-choice" data-role-choice="worker">
-            <span class="choice-icon">🔧</span>
-            <strong>Service Provider</strong>
-            <small>Offer your services to customers</small>
-          </button>
+<!-- Full-screen Login / Register experience -->
+  <div class="modal hidden auth-overlay" id="authModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="auth-shell">
+      <section class="auth-promo" aria-label="About Onawadak.lk">
+      <a href="index.html" class="auth-brand" aria-label="Onawadak.lk home">
+  <div class="auth-logo-box">
+    <img
+      src="onawadak logo.png"
+      alt="Onawadak.lk Logo"
+      class="auth-custom-logo"
+    >
+  </div>
+</a>
+        <div class="auth-promo-content">
+          <span class="auth-eyebrow">LOCAL HELP, MADE SIMPLE</span>
+          <h1>Find help.<br>Get things done.</h1>
+          <p>Connect with service providers near you, request jobs with confidence and manage everything in one place.</p>
+          <div class="auth-benefits">
+            <span>✓ Nearby local services</span>
+            <span>✓ Real customer reviews</span>
+            <span>✓ Easy service requests</span>
+          </div>
         </div>
-      </div>
+        <p class="auth-promo-foot">Built for communities across Sri Lanka</p>
+      </section>
 
-      <!-- STEP 2: Login or Register -->
-      <div id="authChoiceStep" class="hidden">
-        <button type="button" class="back-btn" id="backToRole">← Change account type</button>
-        <h2 id="roleStepTitle">Customer Account</h2>
-        <p id="roleStepSubtitle">Choose an option to continue.</p>
+      <section class="auth-form-panel">
+        <div class="auth-panel-inner">
+          <button type="button" class="auth-back-link" id="closeModal">← Back to website</button>
 
-        <div class="auth-action-grid">
-          <button type="button" class="auth-action" id="chooseLogin">
-            <span>🔐</span>
-            <strong>Login</strong>
-            <small>Already have an account?</small>
-          </button>
-
-          <button type="button" class="auth-action primary-action" id="chooseRegister">
-            <span>📝</span>
-            <strong>Register</strong>
-            <small>Create a new account</small>
-          </button>
-        </div>
-      </div>
-
-      <!-- STEP 3: Login / Register -->
-      <div id="authFormStep" class="hidden">
-        <button type="button" class="back-btn" id="backToAuthChoice">← Back</button>
-        <h2 id="modalTitle">Login</h2>
-        <p id="modalSubtitle">Enter your account details.</p>
-
-        <form id="authForm">
-          <div id="nameField">
-            <label for="nameInput">Full name</label>
-            <input id="nameInput" type="text" placeholder="Full name">
+          <div class="auth-tabs" role="tablist" aria-label="Choose Login or Register">
+            <button type="button" id="authLoginTab" class="auth-tab active" role="tab" aria-selected="true">Login</button>
+            <button type="button" id="authRegisterTab" class="auth-tab" role="tab" aria-selected="false">Register</button>
           </div>
 
-          <div>
-            <label for="emailInput">Email address</label>
-            <input id="emailInput" type="email" placeholder="Email address" required>
+          <div class="auth-heading">
+            <span class="auth-form-eyebrow">WELCOME TO ONAWADAK.LK</span>
+            <h2 id="modalTitle">Welcome back</h2>
+            <p id="modalSubtitle">Sign in to continue to your account.</p>
           </div>
 
-          <div id="phoneField">
-            <label for="phoneInput">Phone number</label>
-            <input id="phoneInput" type="tel" placeholder="Phone number">
+          <div class="auth-role-switch" role="group" aria-label="Account type">
+            <span class="auth-label">Continue as</span>
+            <div class="auth-role-options">
+              <button type="button" class="auth-role-button active" data-role-choice="user" aria-pressed="true">👤 Customer</button>
+              <button type="button" class="auth-role-button" data-role-choice="worker" aria-pressed="false">🔧 Service Provider</button>
+            </div>
           </div>
 
+          <div id="authFormStep">
+            <form id="authForm" class="auth-modern-form">
+              <div id="nameField" class="hidden">
+                <label for="nameInput">Full name</label>
+                <input id="nameInput" type="text" autocomplete="name" placeholder="Enter your full name">
+              </div>
+              <div>
+                <label for="emailInput">Email address</label>
+                <input id="emailInput" type="email" autocomplete="email" placeholder="you@example.com" required>
+              </div>
+              <div id="phoneField" class="hidden">
+                <label for="phoneInput">Phone number</label>
+                <input id="phoneInput" type="tel" autocomplete="tel" placeholder="07XXXXXXXX">
+              </div>
           <!-- Service Provider only -->
           <div id="providerFields" class="hidden provider-fields">
-            <label for="serviceTypeInput">Type of service</label>
-            <select id="serviceTypeInput">
-              <option value="">Select service type</option>
-              <option>Mechanic</option>
-              <option>Towing</option>
-              <option>Battery</option>
-              <option>Tyre Repair</option>
-              <option>Electrician</option>
-              <option>Plumber</option>
-              <option>AC Repair</option>
-              <option>Locksmith</option>
-              <option>IT Support</option>
-              <option>Mobile Repair</option>
-              <option>Cleaning</option>
-              <option>Carpenter</option>
-              <option>Other</option>
-            </select>
+            <label id="serviceOptionsLabel">Services you provide <span class="service-required">*</span></label>
+            <p class="service-helper">Choose one or more services. Customers can find you through any selected service.</p>
+            <div id="serviceMultiSelect" class="service-multi-select" role="group" aria-labelledby="serviceOptionsLabel">
+              <label class="service-choice"><input type="checkbox" name="providerServices" value="Mechanic"><span>Mechanic</span></label>
+              <label class="service-choice"><input type="checkbox" name="providerServices" value="Towing"><span>Towing</span></label>
+              <label class="service-choice"><input type="checkbox" name="providerServices" value="Battery"><span>Battery</span></label>
+              <label class="service-choice"><input type="checkbox" name="providerServices" value="Tyre Repair"><span>Tyre Repair</span></label>
+              <label class="service-choice"><input type="checkbox" name="providerServices" value="Electrician"><span>Electrician</span></label>
+              <label class="service-choice"><input type="checkbox" name="providerServices" value="Plumber"><span>Plumber</span></label>
+              <label class="service-choice"><input type="checkbox" name="providerServices" value="AC Repair"><span>AC Repair</span></label>
+              <label class="service-choice"><input type="checkbox" name="providerServices" value="Locksmith"><span>Locksmith</span></label>
+              <label class="service-choice"><input type="checkbox" name="providerServices" value="IT Support"><span>IT Support</span></label>
+              <label class="service-choice"><input type="checkbox" name="providerServices" value="Mobile Repair"><span>Mobile Repair</span></label>
+              <label class="service-choice"><input type="checkbox" name="providerServices" value="Cleaning"><span>Cleaning</span></label>
+              <label class="service-choice"><input type="checkbox" name="providerServices" value="Carpenter"><span>Carpenter</span></label>
+              <label class="service-choice"><input type="checkbox" name="providerServices" value="Other"><span>Other</span></label>
+            </div>
+            <p id="selectedServiceCount" class="service-selected-count" aria-live="polite">0 services selected</p>
 
             <label for="locationInput">Service area / address</label>
             <input id="locationInput" type="text" placeholder="e.g. Negombo, Kurana">
@@ -316,18 +312,24 @@
             <textarea id="descriptionInput" placeholder="Tell customers about your service..."></textarea>
           </div>
 
-          <div>
-            <label for="passwordInput">Password</label>
-            <input id="passwordInput" type="password" placeholder="Password" required>
+
+              <div>
+                <label for="passwordInput">Password</label>
+                <div class="auth-password-field">
+                  <input id="passwordInput" type="password" autocomplete="current-password" placeholder="Enter password" minlength="6" required>
+                  <button type="button" id="togglePasswordVisibility" class="auth-show-password" aria-label="Show password">Show</button>
+                </div>
+              </div>
+              <div class="auth-submit-row">
+                <button id="authSubmitBtn" class="btn btn-primary full auth-submit" type="submit">Login</button>
+              </div>
+            </form>
+            <p class="forgot-wrap"><button type="button" id="forgotPasswordBtn" class="text-link">Forgot password?</button></p>
+            <p class="switch-auth" id="switchAuthText"></p>
           </div>
-
-          <button id="authSubmitBtn" class="btn btn-primary full" type="submit">Login</button>
-        </form>
-
-        <p class="switch-auth" id="switchAuthText"></p>
-        <p class="forgot-wrap"><button type="button" id="forgotPasswordBtn" class="text-link">Forgot password?</button></p>
-        <p class="demo-note">Accounts, provider profiles and service requests are stored in Firebase.</p>
-      </div>
+          <div class="auth-security-note">🔒 Your account is securely managed with Firebase Authentication.</div>
+        </div>
+      </section>
     </div>
   </div>
 
@@ -338,6 +340,10 @@
       <div class="modal-logo">🚨 Service Request</div>
       <h2 id="requestWorkerName">Request Service</h2>
       <p id="requestServiceName"></p>
+      <div class="request-service-picker" id="requestServicePicker" hidden>
+        <label for="requestServiceSelect">Which service do you need?</label>
+        <select id="requestServiceSelect" required></select>
+      </div>
       <form id="requestForm">
         <textarea id="problemInput" placeholder="Describe your problem..." required></textarea>
         <button class="btn btn-primary full" type="submit">Send Request</button>

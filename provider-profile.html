@@ -7,21 +7,20 @@
     <link rel="stylesheet" href="provider-profile.css" />
   </head>
   <body>
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-mark">⚡</div>
-        <div>
-          <strong>Onawadak.lk</strong>
-          <span>Service Provider Dashboard</span>
-        </div>
-      </div>
-      <a href="index.html" class="ghost-btn"> HOME </a>
-      <div class="top-actions">
-        <span id="availabilityPill" class="availability available"
-          >● Available</span
-        >
-        <button id="profileBtn" class="ghost-btn">My Profile</button>
-        <button id="logoutBtn" class="danger-btn">Logout</button>
+    <header class="topbar" aria-label="Provider dashboard navigation">
+      <a class="brand" href="index.html" aria-label="Onawadak.lk main website">
+        <span class="brand-mark" aria-hidden="true">⚡</span>
+        <span class="brand-copy">
+          <strong>Onawadak<span class="brand-dot">.lk</span></strong>
+          <span class="brand-subtitle">Provider workspace</span>
+        </span>
+      </a>
+
+      <div class="top-actions" aria-label="Account navigation">
+        <a href="index.html" class="nav-action nav-home">⌂ <span>Home</span></a>
+        <span id="availabilityPill" class="availability available" role="status">● Available</span>
+        <button id="profileBtn" class="nav-action nav-profile" type="button">◉ <span>My Profile</span></button>
+        <button id="logoutBtn" class="nav-action nav-logout" type="button">↪ <span>Logout</span></button>
       </div>
     </header>
 
@@ -114,6 +113,7 @@
 
           <div class="panel quick-panel">
             <h2>Quick Actions</h2>
+            <button id="manageServicesBtn" class="quick-btn">🛠 Manage My Services</button>
             <button id="viewProfileQuick" class="quick-btn">
               👤 View / Edit Profile
             </button>
@@ -128,6 +128,23 @@
       </section>
     </main>
 
+
+    <div id="manageServicesModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="manageServicesTitle">
+      <div class="modal-card service-manager-card">
+        <button id="closeManageServices" class="modal-close" type="button" aria-label="Close">×</button>
+        <p class="eyebrow">PROVIDER SERVICES</p>
+        <h2 id="manageServicesTitle">Manage My Services</h2>
+        <p class="muted">Choose all services you can provide. Changes will appear in customer search.</p>
+        <form id="manageServicesForm" class="service-manager-form">
+          <div id="manageServicesOptions" class="service-manager-options"></div>
+          <p id="manageServicesCount" class="service-manager-count"></p>
+          <div class="modal-actions">
+            <button type="button" class="secondary-btn" id="cancelManageServices">Cancel</button>
+            <button type="submit" class="primary-btn">Save Services</button>
+          </div>
+        </form>
+      </div>
+    </div>
     <div id="customerModal" class="modal hidden">
       <div class="modal-card">
         <button id="closeCustomerModal" class="modal-close">×</button>

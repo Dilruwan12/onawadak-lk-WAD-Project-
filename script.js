@@ -53,6 +53,26 @@ const workerList = $('workerList');
 const searchInput = $('serviceSearch');
 const locationStatus = $('locationStatus');
 
+// All services offered by a provider. Older records with only `service` still work.
+function workerServices(worker) {
+  const values = Array.isArray(worker.services) && worker.services.length
+    ? worker.services : [worker.service];
+  return [...new Set(values.filter(v => typeof v === 'string' && v.trim()).map(v => v.trim()))];
+}
+
+function getSelectedProviderServices() {
+  return Array.from(document.querySelectorAll('#serviceMultiSelect input[name="providerServices"]:checked'))
+    .map(input => input.value);
+}
+
+function updateSelectedServiceCount() {
+  const count = getSelectedProviderServices().length;
+  const target = $('selectedServiceCount');
+  if (target) target.textContent = `${count} service${count === 1 ? '' : 's'} selected`;
+}
+$('serviceMultiSelect')?.addEventListener('change', updateSelectedServiceCount);
+
+
 let workers = [];
 let userLocation = null;
 let selectedWorker = null;
@@ -269,10 +289,7 @@ function renderWorkers(filter = '') {
 
     .filter(worker => {
 
-      const service =
-        String(
-          worker.service || ''
-        ).toLowerCase();
+      const workerServiceText = workerServices(worker).join(' ').toLowerCase();
 
 
       const name =
@@ -285,7 +302,7 @@ function renderWorkers(filter = '') {
 
         !needle ||
 
-        service.includes(needle) ||
+        workerServiceText.includes(needle) ||
 
         name.includes(needle);
 
@@ -465,10 +482,7 @@ function renderWorkers(filter = '') {
 
           <small>
 
-            ${escapeHtml(
-              worker.service ||
-              'Service'
-            )}
+            ${escapeHtml(workerServices(worker).join(' • ') || 'Service')}
 
             •
 
@@ -580,9 +594,7 @@ function renderWorkers(filter = '') {
 
         <br>
 
-        ${escapeHtml(
-          worker.service || ''
-        )}
+        ${escapeHtml(workerServices(worker).join(', '))}
 
         ${
           worker.distance !== null
@@ -896,33 +908,38 @@ const requestModal =
 
 
 function openRequest(id) {
-
-  selectedWorker =
-    workers.find(
-      worker =>
-        worker.id === id
-    );
-
-
+  selectedWorker = workers.find(worker => worker.id === id);
   if (!selectedWorker) return;
 
+  if (auth.currentUser?.uid === selectedWorker.id) {
+    alert('You cannot request your own service.');
+    return;
+  }
 
-  $('requestWorkerName')
-    .textContent =
-      selectedWorker.name ||
-      'Service Provider';
+  const offeredServices = workerServices(selectedWorker);
+  const picker = $('requestServicePicker');
+  const select = $('requestServiceSelect');
+  select.replaceChildren();
 
+  offeredServices.forEach(service => {
+    const option = document.createElement('option');
+    option.value = service;
+    option.textContent = service;
+    select.appendChild(option);
+  });
 
-  $('requestServiceName')
-    .textContent =
-      selectedWorker.service ||
-      'Service';
+  // If the customer searched for a specific service, preselect it.
+  const searchedService = searchInput.value.trim().toLowerCase();
+  const matchingService = offeredServices.find(service => service.toLowerCase() === searchedService);
+  if (matchingService) select.value = matchingService;
+  picker.hidden = offeredServices.length <= 1;
 
-
-  requestModal
-    .classList.remove('hidden');
+  $('requestWorkerName').textContent = selectedWorker.name || 'Service Provider';
+  $('requestServiceName').textContent = offeredServices.length > 1
+    ? `${offeredServices.length} available services — choose the one you need`
+    : (offeredServices[0] || 'Service');
+  requestModal.classList.remove('hidden');
 }
-
 
 $('closeRequest').onclick =
   () => {
@@ -943,14 +960,18 @@ $('requestForm').onsubmit =
     event.preventDefault();
 
 
-    const user =
-      auth.currentUser;
+    const user = auth.currentUser;
+    const requestedService = $('requestServiceSelect').value;
+    if (!selectedWorker || !workerServices(selectedWorker).includes(requestedService)) {
+      alert('Please select a valid service.');
+      return;
+    }
 
 
     if (!user) {
 
       alert(
-        'Please login as a Customer before sending a service request.'
+        'Please login to send a service request.'
       );
 
       requestModal
@@ -1019,13 +1040,9 @@ if (selectedWorker.id === user.uid) {
               selectedWorker.phone || '',
 
             service:
-              selectedWorker.service || ''
+              requestedService
 
           },
-
-
-          customerId:
-            user.uid,
 
 
           customerId: user.uid,
@@ -1056,7 +1073,7 @@ customerSnapshot: {
 
 
           serviceType:
-            selectedWorker.service || '',
+            requestedService,
 
 
           description:
@@ -1352,15 +1369,6 @@ let selectedRole = null;
 let authMode = 'login';
 
 
-const roleStep =
-  $('roleStep');
-
-const authChoiceStep =
-  $('authChoiceStep');
-
-const authFormStep =
-  $('authFormStep');
-
 
 const nameField =
   $('nameField');
@@ -1380,9 +1388,6 @@ const emailInput =
 
 const phoneInput =
   $('phoneInput');
-
-const serviceTypeInput =
-  $('serviceTypeInput');
 
 const locationInput =
   $('locationInput');
@@ -1404,76 +1409,31 @@ const switchAuthText =
 
 
 /* =========================================================
-   OPEN AUTH MODAL
+   AUTH UI - Full-screen Login / Register tabs
 ========================================================= */
-
-function openAuthModal() {
-
-  selectedRole = null;
-
-  authMode = 'login';
-
+function openAuthModal(mode = 'login') {
+  selectedRole = 'user';
   providerLocation = null;
-
-
-  roleStep
-    .classList.remove('hidden');
-
-
-  authChoiceStep
-    .classList.add('hidden');
-
-
-  authFormStep
-    .classList.add('hidden');
-
-
-  authModal
-    .classList.remove('hidden');
+  authModal.classList.remove('hidden');
+  document.body.classList.add('auth-open');
+  showAuthForm(mode);
 }
-
-
-/* =========================================================
-   SELECT ACCOUNT ROLE
-========================================================= */
 
 function selectRole(role) {
-
+  if (!['user', 'worker'].includes(role)) return;
   selectedRole = role;
-
-
-  roleStep
-    .classList.add('hidden');
-
-
-  authChoiceStep
-    .classList.remove('hidden');
-
-
-  const worker =
-    role === 'worker';
-
-
-  $('roleStepTitle')
-    .textContent =
-
-      worker
-
-        ? '🔧 Service Provider Account'
-
-        : '👤 Customer Account';
-
-
-  $('roleStepSubtitle')
-    .textContent =
-
-      worker
-
-        ? 'Login to manage your provider profile or register your service.'
-
-        : 'Login or create a customer account.';
+  document.querySelectorAll('#authModal [data-role-choice]').forEach(button => {
+    const active = button.dataset.roleChoice === role;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+  showAuthForm(authMode);
 }
 
+function closeAuthModal() {
+  authModal.classList.add('hidden');
+  document.body.classList.remove('auth-open');
+}
 
 /* =========================================================
    PROVIDER LOCATION PICKER MAP
@@ -1658,281 +1618,68 @@ $('useProviderLocationBtn')
 
 
 /* =========================================================
-   SHOW AUTH FORM
+   AUTH MODE + CONTROLS
 ========================================================= */
-
 function showAuthForm(mode) {
+  authMode = mode === 'register' ? 'register' : 'login';
+  const worker = selectedRole === 'worker';
+  const reg = authMode === 'register';
+  const heading = $('modalTitle');
 
-  authMode = mode;
+  $('authLoginTab').classList.toggle('active', !reg);
+  $('authRegisterTab').classList.toggle('active', reg);
+  $('authLoginTab').setAttribute('aria-selected', String(!reg));
+  $('authRegisterTab').setAttribute('aria-selected', String(reg));
 
+  heading.textContent = reg ? 'Create your account' : 'Welcome back';
+  $('modalSubtitle').textContent = reg
+    ? 'Join Onawadak.lk and get started in minutes.'
+    : 'Sign in to access your service requests and account.';
 
-  authChoiceStep
-    .classList.add('hidden');
-
-
-  authFormStep
-    .classList.remove('hidden');
-
-
-  const worker =
-    selectedRole === 'worker';
-
-
-  const reg =
-    mode === 'register';
-
-
-  $('modalTitle')
-    .textContent =
-
-      reg
-
-        ? (
-            worker
-
-              ? 'Register as Service Provider'
-
-              : 'Create Customer Account'
-          )
-
-        : (
-            worker
-
-              ? 'Service Provider Login'
-
-              : 'Customer Login'
-          );
-
-
-  $('modalSubtitle')
-    .textContent =
-
-      reg
-
-        ? (
-            worker
-
-              ? 'Add your real service details and pin your service location.'
-
-              : 'Create your customer account.'
-          )
-
-        : 'Enter your email and password to continue.';
-
-
-  nameField
-    .classList.toggle(
-      'hidden',
-      !reg
-    );
-
-
-  phoneField
-    .classList.toggle(
-      'hidden',
-      !reg
-    );
-
-
-  providerFields
-    .classList.toggle(
-
-      'hidden',
-
-      !(worker && reg)
-
-    );
-
-
-  nameInput.required =
-    reg;
-
-
-  phoneInput.required =
-    reg;
-
-
-  serviceTypeInput.required =
-    worker && reg;
-
-
-  locationInput.required =
-    worker && reg;
-
-
+  nameField.classList.toggle('hidden', !reg);
+  phoneField.classList.toggle('hidden', !reg);
+  providerFields.classList.toggle('hidden', !(worker && reg));
+  nameInput.required = reg;
+  phoneInput.required = reg;
+  locationInput.required = worker && reg;
+  passwordInput.autocomplete = reg ? 'new-password' : 'current-password';
+  passwordInput.type = 'password';
+  $('togglePasswordVisibility').textContent = 'Show';
   passwordInput.value = '';
+  authSubmitBtn.textContent = reg ? 'Create Account' : 'Login';
+  $('forgotPasswordBtn').classList.toggle('hidden', reg);
+  switchAuthText.innerHTML = reg
+    ? 'Already have an account? <button type="button" id="switchAuthBtn">Login</button>'
+    : 'New to Onawadak? <button type="button" id="switchAuthBtn">Create an account</button>';
+  $('switchAuthBtn').onclick = () => showAuthForm(reg ? 'login' : 'register');
 
-
-  authSubmitBtn.textContent =
-
-    reg
-
-      ? 'Create Account'
-
-      : 'Login';
-
-
-  $('forgotPasswordBtn')
-    .style.display =
-
-      reg
-
-        ? 'none'
-
-        : 'inline-block';
-
-
-  switchAuthText.innerHTML =
-
-    reg
-
-      ? `
-        Already have an account?
-
-        <button
-          type="button"
-          id="switchAuthBtn"
-        >
-          Login
-        </button>
-      `
-
-      : `
-        Don't have an account?
-
-        <button
-          type="button"
-          id="switchAuthBtn"
-        >
-          Register
-        </button>
-      `;
-
-
-  $('switchAuthBtn').onclick =
-    () => {
-
-      showAuthForm(
-
-        reg
-
-          ? 'login'
-
-          : 'register'
-
-      );
-    };
-
-
-  if (
-    worker &&
-    reg
-  ) {
-
-    initProviderPicker();
-  }
+  if (worker && reg) initProviderPicker();
 }
 
+$('loginBtn').addEventListener('click', () => openAuthModal('login'));
+$('registerBtn').addEventListener('click', () => openAuthModal('register'));
+$('authLoginTab').addEventListener('click', () => showAuthForm('login'));
+$('authRegisterTab').addEventListener('click', () => showAuthForm('register'));
+$('closeModal').addEventListener('click', closeAuthModal);
 
-/* =========================================================
-   AUTH MODAL BUTTONS
-========================================================= */
+$('togglePasswordVisibility').addEventListener('click', () => {
+  const show = passwordInput.type === 'password';
+  passwordInput.type = show ? 'text' : 'password';
+  $('togglePasswordVisibility').textContent = show ? 'Hide' : 'Show';
+  $('togglePasswordVisibility').setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+});
 
-$('registerBtn').onclick =
-  openAuthModal;
+document.querySelectorAll('#authModal [data-role-choice]').forEach(button => {
+  button.addEventListener('click', () => selectRole(button.dataset.roleChoice));
+});
 
+authModal.addEventListener('click', event => {
+  if (event.target === authModal) closeAuthModal();
+});
 
-$('loginBtn').onclick =
-  openAuthModal;
-
-
-document
-  .querySelectorAll(
-    '[data-role-choice]'
-  )
-  .forEach(
-    button => {
-
-      button.addEventListener(
-        'click',
-        () => {
-
-          selectRole(
-            button.dataset.roleChoice
-          );
-
-        }
-      );
-    }
-  );
-
-
-$('chooseLogin').onclick =
-  () => {
-
-    showAuthForm('login');
-
-  };
-
-
-$('chooseRegister').onclick =
-  () => {
-
-    showAuthForm('register');
-
-  };
-
-
-$('backToRole').onclick =
-  () => {
-
-    roleStep
-      .classList.remove('hidden');
-
-    authChoiceStep
-      .classList.add('hidden');
-
-  };
-
-
-$('backToAuthChoice').onclick =
-  () => {
-
-    authChoiceStep
-      .classList.remove('hidden');
-
-    authFormStep
-      .classList.add('hidden');
-
-  };
-
-
-$('closeModal').onclick =
-  () => {
-
-    authModal
-      .classList.add('hidden');
-
-  };
-
-
-authModal
-  .addEventListener(
-    'click',
-    event => {
-
-      if (
-        event.target ===
-        authModal
-      ) {
-
-        authModal
-          .classList.add('hidden');
-
-      }
-    }
-  );
-
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !authModal.classList.contains('hidden')) closeAuthModal();
+});
 
 /* =========================================================
    FORGOT PASSWORD
@@ -2125,6 +1872,10 @@ $('authForm').onsubmit =
         }
 
 
+        if (selectedRole === 'worker' && getSelectedProviderServices().length === 0) {
+          throw new Error('Please select at least one service.');
+        }
+
         const credential =
           await createUserWithEmailAndPassword(
 
@@ -2174,8 +1925,10 @@ $('authForm').onsubmit =
             profile,
             {
 
-              service:
-                serviceTypeInput.value,
+              services: getSelectedProviderServices(),
+
+              // Keep legacy `service` for compatibility with existing code.
+              service: getSelectedProviderServices()[0],
 
               location:
                 locationInput
@@ -2243,8 +1996,7 @@ $('authForm').onsubmit =
           );
 
 
-          authModal
-            .classList.add('hidden');
+          closeAuthModal();
 
 
           event.target.reset();
@@ -2330,8 +2082,7 @@ $('authForm').onsubmit =
 
         else {
 
-          authModal
-            .classList.add('hidden');
+          closeAuthModal();
 
 
           event.target.reset();

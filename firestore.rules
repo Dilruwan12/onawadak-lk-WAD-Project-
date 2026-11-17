@@ -1,74 +1,164 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userExists(uid) {
+      return exists(/databases/$(database)/documents/users/$(uid));
+    }
+
+    function validRequester() {
+      return signedIn() &&
+        userExists(request.auth.uid) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+          in ['user', 'worker'];
+    }
+
+    function validProvider(providerId) {
+      return providerId is string &&
+        providerId != request.auth.uid &&
+        userExists(providerId) &&
+        get(/databases/$(database)/documents/users/$(providerId)).data.role
+          == 'worker';
+    }
+
     match /users/{userId} {
+
       allow read: if true;
 
       allow create:
-        if request.auth != null &&
+        if signedIn() &&
         request.auth.uid == userId;
 
-      // Owner may edit own profile.
-      // A logged-in customer may only change a provider's rating summary fields.
+      // Account owner can update own profile.
+      // Rating summary updates are limited to provider profiles.
       allow update:
-        if request.auth != null &&
+        if signedIn() &&
         (
           request.auth.uid == userId ||
-          request.resource.data.diff(resource.data)
-            .affectedKeys()
-            .hasOnly(['rating', 'reviewCount'])
+          (
+            resource.data.role == 'worker' &&
+            request.resource.data.diff(resource.data)
+              .affectedKeys()
+              .hasOnly(['rating', 'reviewCount']) &&
+            request.resource.data.rating is number &&
+            request.resource.data.rating >= 0 &&
+            request.resource.data.rating <= 5 &&
+            request.resource.data.reviewCount is int &&
+            request.resource.data.reviewCount >= 0
+          )
         );
 
       allow delete:
-        if request.auth != null &&
+        if signedIn() &&
         request.auth.uid == userId;
     }
 
-    match /requests/{requestId} {
-      allow create:
-        if request.auth != null &&
-        request.resource.data.customerId == request.auth.uid;
 
+    match /requests/{requestId} {
+
+      // Customers and service providers can send requests
+      // to another service provider.
+      allow create:
+        if validRequester() &&
+        request.resource.data.customerId == request.auth.uid &&
+        validProvider(request.resource.data.providerId) &&
+        request.resource.data.status == 'pending' &&
+        request.resource.data.providerId != request.auth.uid;
+
+      // Only the requester and selected provider can read.
       allow read:
-        if request.auth != null &&
+        if signedIn() &&
         (
           resource.data.customerId == request.auth.uid ||
           resource.data.providerId == request.auth.uid
         );
 
-      // Provider can manage the job.
-      // Customer can add review-related fields to their own completed request.
+      // Provider can only update their own assigned jobs
+      // with valid status transitions.
       allow update:
-        if request.auth != null &&
+        if signedIn() &&
         (
-          resource.data.providerId == request.auth.uid ||
+          (
+            resource.data.providerId == request.auth.uid &&
+            request.resource.data.diff(resource.data)
+              .affectedKeys()
+              .hasOnly([
+                'status',
+                'providerRespondedAt',
+                'updatedAt',
+                'paymentAmount',
+                'paymentStatus',
+                'completedAt'
+              ]) &&
+            (
+              (
+                resource.data.status == 'pending' &&
+                request.resource.data.status in ['accepted', 'rejected']
+              ) ||
+              (
+                resource.data.status == 'accepted' &&
+                request.resource.data.status == 'completed' &&
+                request.resource.data.paymentAmount is number &&
+                request.resource.data.paymentAmount >= 0 &&
+                request.resource.data.paymentStatus == 'paid' &&
+                request.resource.data.completedAt is timestamp
+              )
+            )
+          ) ||
+
+          // Request owner can submit a review only once
+          // after the provider completes the job.
           (
             resource.data.customerId == request.auth.uid &&
             resource.data.status == 'completed' &&
+            resource.data.reviewSubmitted != true &&
+            request.resource.data.reviewSubmitted == true &&
+            request.resource.data.rating is number &&
+            request.resource.data.rating >= 1 &&
+            request.resource.data.rating <= 5 &&
+            request.resource.data.review is string &&
+            request.resource.data.reviewedAt is timestamp &&
             request.resource.data.diff(resource.data)
               .affectedKeys()
-              .hasOnly(['reviewSubmitted', 'rating', 'review', 'reviewedAt'])
+              .hasOnly([
+                'reviewSubmitted',
+                'rating',
+                'review',
+                'reviewedAt'
+              ])
           )
         );
 
       allow delete: if false;
     }
 
+
     match /reviews/{requestId} {
+
       allow read: if true;
 
       allow create:
-        if request.auth != null &&
+        if signedIn() &&
         request.resource.data.customerId == request.auth.uid &&
         request.resource.data.requestId == requestId &&
         request.resource.data.rating is number &&
         request.resource.data.rating >= 1 &&
         request.resource.data.rating <= 5 &&
         exists(/databases/$(database)/documents/requests/$(requestId)) &&
-        get(/databases/$(database)/documents/requests/$(requestId)).data.customerId == request.auth.uid &&
-        get(/databases/$(database)/documents/requests/$(requestId)).data.status == 'completed';
+        get(/databases/$(database)/documents/requests/$(requestId)).data.customerId
+          == request.auth.uid &&
+        get(/databases/$(database)/documents/requests/$(requestId)).data.status
+          == 'completed' &&
+        get(/databases/$(database)/documents/requests/$(requestId)).data.reviewSubmitted
+          != true &&
+        request.resource.data.providerId ==
+          get(/databases/$(database)/documents/requests/$(requestId)).data.providerId;
 
       allow update, delete: if false;
     }

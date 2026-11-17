@@ -8,6 +8,12 @@ const $ = id => document.getElementById(id);
 let currentProvider = null;
 let requests = [];
 
+const PROVIDER_SERVICES = ['Mechanic', 'Towing', 'Battery', 'Tyre Repair', 'Electrician', 'Plumber', 'AC Repair', 'Locksmith', 'IT Support', 'Mobile Repair', 'Cleaning', 'Carpenter', 'Other'];
+function providerServices(provider) {
+  if (Array.isArray(provider.services) && provider.services.length) return provider.services;
+  return provider.service ? [provider.service] : [];
+}
+
 const money = v => 'Rs. ' + Number(v || 0).toLocaleString('en-LK', { maximumFractionDigits: 2 });
 
 function safeDate(v) {
@@ -327,10 +333,74 @@ $('toggleAvailabilityBtn').onclick = async () => {
   showToast(value ? 'You are now available.' : 'You are now unavailable.');
 };
 
+function closeServiceManager() {
+  $('manageServicesModal').classList.add('hidden');
+}
+
+function updateManageServiceCount() {
+  const count = document.querySelectorAll('#manageServicesOptions input:checked').length;
+  $('manageServicesCount').textContent = `${count} service${count === 1 ? '' : 's'} selected`;
+}
+
+$('manageServicesBtn').addEventListener('click', () => {
+  if (!currentProvider) return;
+  const current = providerServices(currentProvider);
+  const options = [...new Set([...PROVIDER_SERVICES, ...current])];
+  const container = $('manageServicesOptions');
+  container.replaceChildren();
+  options.forEach(service => {
+    const label = document.createElement('label');
+    label.className = 'manager-service-choice';
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.value = service;
+    checkbox.checked = current.includes(service);
+    const span = document.createElement('span');
+    span.textContent = service;
+    label.append(checkbox, span);
+    container.appendChild(label);
+  });
+  updateManageServiceCount();
+  $('manageServicesModal').classList.remove('hidden');
+});
+
+$('manageServicesOptions').addEventListener('change', updateManageServiceCount);
+$('closeManageServices').addEventListener('click', closeServiceManager);
+$('cancelManageServices').addEventListener('click', closeServiceManager);
+$('manageServicesModal').addEventListener('click', e => {
+  if (e.target === $('manageServicesModal')) closeServiceManager();
+});
+
+$('manageServicesForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!auth.currentUser || !currentProvider) return;
+  const list = Array.from(document.querySelectorAll('#manageServicesOptions input:checked'))
+    .map(el => el.value);
+  if (!list.length) return alert('Select at least one service.');
+  const button = event.submitter;
+  if (button) button.disabled = true;
+  try {
+    await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+      services: list,
+      service: list[0],
+      updatedAt: serverTimestamp()
+    });
+    currentProvider.services = list;
+    currentProvider.service = list[0];
+    closeServiceManager();
+    showToast('Your services have been updated.');
+  } catch (error) {
+    console.error(error);
+    alert('Could not update services: ' + error.message);
+  } finally {
+    if (button) button.disabled = false;
+  }
+});
+
 $('profileBtn').onclick = () =>
   alert(
     `Name: ${currentProvider?.name || ''}\n` +
-    `Service: ${currentProvider?.service || ''}\n` +
+    `Services: ${providerServices(currentProvider || {}).join(', ')}\n` +
     `Area: ${currentProvider?.location || ''}\n` +
     `Phone: ${currentProvider?.phone || ''}\n` +
     `Rating: ${Number(currentProvider?.reviewCount || 0) ? Number(currentProvider?.rating || 0).toFixed(1) + ' ⭐' : 'New'}`

@@ -901,3 +901,63 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+/* ====================================================
+   ONAWADAK PROVIDER | PROFESSIONAL NAVIGATION 2026
+   Keep below older dashboard media rules.
+==================================================== */
+.topbar {
+  height:auto !important;
+  min-height:84px !important;
+  padding:14px clamp(16px,4vw,64px) !important;
+  display:flex !important;
+  justify-content:space-between !important;
+  align-items:center !important;
+  flex-wrap:wrap;
+  gap:12px 20px !important;
+  background:#fff !important;
+  border-bottom:1px solid #e2e8f0 !important;
+  box-shadow:0 5px 22px rgba(15,23,42,.035);
+}
+.topbar .brand {
+  display:flex; align-items:center; gap:11px;
+  color:#0f172a; text-decoration:none; min-width:0;
+}
+.topbar .brand-mark {
+  display:grid !important; place-items:center;
+  width:46px !important; height:46px !important;
+  background:linear-gradient(135deg,#1d4ed8,#60a5fa) !important;
+  color:#fff; border-radius:14px !important; font-size:23px !important;
+  box-shadow:0 8px 20px rgba(37,99,235,.2);
+}
+.topbar .brand-copy { display:flex !important; flex-direction:column; gap:2px; min-width:0; }
+.topbar .brand-copy strong { font-size:19px !important; line-height:1.2; letter-spacing:-.5px; white-space:nowrap; }
+.topbar .brand-dot { color:#2563eb; }
+.topbar .brand-subtitle { display:block !important; font-size:11px !important; color:#64748b !important; font-weight:600; margin:0 !important; }
+.topbar .top-actions { display:flex !important; align-items:center; justify-content:flex-end; gap:9px !important; min-width:0; width:auto !important; }
+.topbar .nav-action { border:1px solid #e2e8f0; background:#fff; color:#334155; border-radius:10px; padding:11px 14px; min-height:42px; font-size:13px; font-weight:750; text-decoration:none; display:inline-flex; gap:7px; align-items:center; justify-content:center; white-space:nowrap; transition:background .2s,border-color .2s; }
+.topbar .nav-action:hover { background:#f8fafc; border-color:#93c5fd; }
+.topbar .nav-home { background:#eff6ff; border-color:#dbeafe; color:#1d4ed8; }
+.topbar .nav-logout { color:#b91c1c; background:#fff8f8; border-color:#fee2e2; }
+.topbar .availability { display:inline-flex; align-items:center; justify-content:center; min-height:40px; border-radius:999px; font-size:12px; white-space:nowrap; padding:8px 13px; }
+.service-manager-card { max-width:550px; }
+.service-manager-form { margin-top:18px; }
+.service-manager-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin:14px 0; }
+.manager-service-choice { border:1px solid #e2e8f0; background:#f8fafc; padding:11px; border-radius:10px; display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; font-weight:600; }
+.manager-service-choice:has(input:checked) { border-color:#2563eb; background:#eff6ff; }
+.manager-service-choice input { accent-color:#2563eb; width:17px; height:17px; }
+.service-manager-count { color:#2563eb; font-size:13px; font-weight:700; margin:10px 0; }
+@media(max-width:680px) {
+  .topbar { display:grid !important; grid-template-columns:1fr !important; gap:13px !important; padding:13px 14px !important; }
+  .topbar .brand-mark { width:42px !important; height:42px !important; }
+  .topbar .brand-copy strong { font-size:18px !important; }
+  .topbar .top-actions { grid-column:auto !important; display:grid !important; width:100% !important; grid-template-columns:repeat(4,minmax(0,1fr)) !important; gap:6px !important; }
+  .topbar .nav-action { padding:10px 5px; font-size:11px; min-height:42px; gap:4px; }
+  .topbar .availability { padding:7px 4px !important; font-size:10px !important; min-height:42px; }
+  .topbar .nav-action span { white-space:nowrap; }
+  .service-manager-options { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:365px) {
+  .topbar .nav-action { font-size:10px; gap:2px; }
+  .topbar .top-actions { gap:4px !important; }
+}
