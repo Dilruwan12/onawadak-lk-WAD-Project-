@@ -1027,9 +1027,6 @@ if (selectedWorker.id === user.uid) {
           customerId:
             user.uid,
 
-
-          customerId: user.uid,
-
 customerRole: requesterRole,
 
 customerSnapshot: {
