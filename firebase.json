@@ -8,7 +8,10 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "firestore.rules",
+      "README.txt",
+      "*.patch"
     ]
   }
 }
