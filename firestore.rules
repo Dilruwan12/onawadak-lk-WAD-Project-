@@ -13,14 +13,23 @@ service cloud.firestore {
         request.auth.uid == userId;
 
       // Owner may edit own profile.
-      // A logged-in customer may only change a provider's rating summary fields.
+      // A logged-in customer may only change a provider's rating summary fields with valid review values.
       allow update:
         if request.auth != null &&
         (
           request.auth.uid == userId ||
-          request.resource.data.diff(resource.data)
-            .affectedKeys()
-            .hasOnly(['rating', 'reviewCount'])
+          (
+            resource.data.role == 'worker' &&
+            request.auth.uid != userId &&
+            request.resource.data.diff(resource.data)
+              .affectedKeys()
+              .hasOnly(['rating', 'reviewCount']) &&
+            request.resource.data.rating is number &&
+            request.resource.data.rating >= 0 &&
+            request.resource.data.rating <= 5 &&
+            request.resource.data.reviewCount is number &&
+            request.resource.data.reviewCount >= 0
+          )
         );
 
       allow delete:
