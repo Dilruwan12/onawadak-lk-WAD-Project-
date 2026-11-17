@@ -1,0 +1,24 @@
+/* Onawadak.lk nearby-map styling, loaded after the existing CSS */
+.nearby-layout { align-items: start; min-width: 0; }
+.nearby-map-panel { width: 100%; min-width: 0; overflow: hidden; border: 1px solid #d9e4f1; border-radius: 22px; background: #fff; box-shadow: 0 12px 34px rgba(15,40,78,.06); }
+.nearby-map-head { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; padding: 16px 18px; gap:12px; }
+.nearby-map-head strong { display:block; font-weight:800; color:#13365e; font-size:15px; }
+.nearby-map-head small { display:block; color:#64748b; font-size:12px; margin-top:3px; }
+.nearby-map-legend { display:flex; align-items:center; gap:13px; font-size:12px; color:#475569; }
+.nearby-map-legend span { display:inline-flex; gap:5px; align-items:center; }
+.marker-dot { display:inline-block; width:10px; height:10px; border-radius:50%; box-shadow:0 0 0 2px #fff,0 0 0 3px #cbd5e1; }
+.marker-dot.red { background:#ed3349; } .marker-dot.blue { background:#2574ed; }
+.nearby-map-panel #map { display:block; position:relative; width:100% !important; height:460px !important; min-height:340px; max-width:100%; min-width:0; border:0; border-radius:0; background:#dceaf3; z-index:0; }
+.nearby-map-panel #map .leaflet-container { font:inherit; }
+.nearby-map-panel #map .leaflet-tile-pane img { max-width:none !important; }
+.nearby-map-panel #map .leaflet-popup-content { min-width: 135px; line-height:1.6; }
+.nearby-map-foot { display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between; padding: 12px 18px; color:#64748b; font-size:12px; }
+.onawadak-pin-container { background:transparent; border:0; }
+.onawadak-map-pin { position:relative; display:block; width:30px; height:30px; transform:rotate(-45deg); border-radius: 50% 50% 50% 4px; background:#ef3348; border:3px solid #fff; box-shadow:0 3px 10px rgba(13,32,55,.32); }
+.onawadak-map-pin > span { position:absolute; top:8px; left:8px; width:8px; height:8px; border-radius:50%; background:#fff; }
+.onawadak-map-pin.customer-pin { background:#2563eb; }
+@media (max-width: 720px) {
+  .nearby-map-panel #map { height:355px !important; min-height:300px; }
+  .nearby-map-head { padding:14px; }
+  .nearby-map-foot { padding:10px 14px; }
+}

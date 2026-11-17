@@ -9,11 +9,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIINfQ3K0jG6H3k4Y7Q6Y5e1f9p8x7m6n5o="
-        crossorigin=""/>
+  <link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
   <link rel="stylesheet" href="provider-profile.css">
   <link rel="stylesheet" href="auth-ui.css">
+  <link rel="stylesheet" href="nearby-map.css">
 </head>
 <body>
   <header class="navbar">
@@ -179,7 +181,14 @@
 
       <div class="nearby-layout">
         <div id="workerList" class="worker-list"></div>
-        <div id="map" class="map"></div>
+        <div class="nearby-map-panel">
+          <div class="nearby-map-head">
+            <div><strong>Live provider locations</strong><small>Enable location to see providers near you</small></div>
+            <div class="nearby-map-legend"><span><i class="marker-dot red"></i> Providers</span><span><i class="marker-dot blue"></i> You</span></div>
+          </div>
+          <div id="map" class="map" aria-label="Map of service providers"></div>
+          <div class="nearby-map-foot"><span id="mapProviderCount">Loading providers...</span><span>📍 Exact locations depend on provider registration</span></div>
+        </div>
       </div>
     </section>
 

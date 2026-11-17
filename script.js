@@ -111,18 +111,36 @@ services.forEach(([icon, name, desc]) => {
    MAIN NEARBY MAP
 ========================================================= */
 
-const map = L.map('map').setView(
-  [7.8731, 80.7718],
-  7
-);
+const map = L.map('map', {
+  zoomControl: true,
+  scrollWheelZoom: false
+}).setView([7.8731, 80.7718], 7);
 
-L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap contributors'
-  }
-).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// Div icons have predictable colored pins, independent of browser icon assets.
+const providerPinIcon = L.divIcon({
+  className: 'onawadak-pin-container',
+  html: '<span class="onawadak-map-pin provider-pin"><span></span></span>',
+  iconSize: [32, 42], iconAnchor: [16, 39], popupAnchor: [0, -37]
+});
+const customerPinIcon = L.divIcon({
+  className: 'onawadak-pin-container',
+  html: '<span class="onawadak-map-pin customer-pin"><span></span></span>',
+  iconSize: [32, 42], iconAnchor: [16, 39], popupAnchor: [0, -37]
+});
+let customerRadiusCircle = null;
+
+// Leaflet needs a resize notification whenever the responsive map box changes.
+if (typeof ResizeObserver !== 'undefined') {
+  const mapResizeObserver = new ResizeObserver(() => {
+    requestAnimationFrame(() => map.invalidateSize({ pan: false }));
+  });
+  mapResizeObserver.observe(document.getElementById('map'));
+}
 
 
 /* =========================================================
@@ -416,6 +434,8 @@ function renderWorkers(filter = '') {
     `;
 
 
+    const counter = $('mapProviderCount');
+    if (counter) counter.textContent = '0 matching providers on the map';
     fixNearbyMapSize();
 
     return;
@@ -579,7 +599,7 @@ function renderWorkers(filter = '') {
       latitude,
       longitude
 
-    ])
+    ], { icon: providerPinIcon, title: worker.name || 'Service Provider' })
 
       .addTo(map)
 
@@ -616,8 +636,10 @@ function renderWorkers(filter = '') {
   });
 
 
-  /* Fix Leaflet display */
+  const counter = $('mapProviderCount');
+  if (counter) counter.textContent = `${list.length} matching provider${list.length === 1 ? '' : 's'} on the map`;
 
+  /* Fix Leaflet display */
   fixNearbyMapSize();
 }
 
@@ -825,7 +847,7 @@ function useCustomerLocation() {
 
           userLocation.lng
 
-        ])
+        ], { icon: customerPinIcon, title: 'Your current location', zIndexOffset: 1000 })
 
           .addTo(map)
 
@@ -836,31 +858,36 @@ function useCustomerLocation() {
           .openPopup();
 
 
-        /* Move map */
-
-        map.setView([
-
-          userLocation.lat,
-
-          userLocation.lng
-
-        ], 13);
-
+        /* Show the customer's chosen search radius as a subtle circle. */
+        if (customerRadiusCircle) map.removeLayer(customerRadiusCircle);
+        const radiusKm = Number($('radiusSelect').value || 10);
+        customerRadiusCircle = L.circle([userLocation.lat, userLocation.lng], {
+          radius: radiusKm * 1000,
+          color: '#2563eb',
+          weight: 1.5,
+          opacity: 0.5,
+          fillColor: '#60a5fa',
+          fillOpacity: 0.06,
+          interactive: false
+        }).addTo(map);
 
         locationStatus.textContent =
-          'Location ready. Showing nearest registered providers.';
+          'Location ready. Red pins show matching providers within your search radius.';
 
+        renderWorkers(searchInput.value.trim());
 
-        /*
-         Re-render workers.
-
-         This calculates distances
-         and applies radius filtering.
-        */
-
-        renderWorkers(
-          searchInput.value.trim()
-        );
+        // Center on the user, while keeping nearby provider pins in view.
+        const visiblePoints = [userMarker.getLatLng(), ...markers.map(marker => marker.getLatLng())];
+        requestAnimationFrame(() => {
+          map.invalidateSize({ pan: false });
+          if (visiblePoints.length > 1) {
+            map.fitBounds(L.latLngBounds(visiblePoints), {
+              padding: [42, 42], maxZoom: 14, animate: true
+            });
+          } else {
+            map.setView([userLocation.lat, userLocation.lng], 13);
+          }
+        });
 
       },
 
@@ -897,6 +924,11 @@ $('locationBtn')
     'click',
     useCustomerLocation
   );
+
+$('radiusSelect')?.addEventListener('change', () => {
+  if (!userLocation || !customerRadiusCircle) return;
+  customerRadiusCircle.setRadius(Number($('radiusSelect').value || 10) * 1000);
+});
 
 
 /* =========================================================
