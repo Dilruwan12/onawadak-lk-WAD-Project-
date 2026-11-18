@@ -981,6 +981,10 @@ $('closeRequest').onclick =
 
   };
 
+requestModal.addEventListener('click', event => {
+  if (event.target === requestModal) requestModal.classList.add('hidden');
+});
+
 
 /* =========================================================
    SEND SERVICE REQUEST
@@ -1217,8 +1221,6 @@ if (!['user', 'worker'].includes(profile.role || 'user')) {
   customerRequestsSection.classList.add('hidden');
   return;
 }
-
-customerRequestsSection.classList.remove('hidden');
 
   customerRequestsSection.classList.remove('hidden');
   customerRequestsList.innerHTML =
@@ -1712,7 +1714,9 @@ authModal.addEventListener('click', event => {
 });
 
 document.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && !authModal.classList.contains('hidden')) closeAuthModal();
+  if (event.key !== 'Escape') return;
+  if (!authModal.classList.contains('hidden')) closeAuthModal();
+  if (!requestModal.classList.contains('hidden')) requestModal.classList.add('hidden');
 });
 
 /* =========================================================
