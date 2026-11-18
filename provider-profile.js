@@ -277,8 +277,30 @@ const requesterType =
   $('customerAmount').textContent = money(r.paymentAmount ?? r.amount);
 
   const phone = (c.phone || '').replace(/[^\d+]/g, '');
-  $('customerCallBtn').href = phone ? `tel:${phone}` : '#';
-  $('customerEmailBtn').href = c.email ? `mailto:${c.email}` : '#';
+  const callBtn = $('customerCallBtn');
+  if (phone) {
+    callBtn.href = `tel:${phone}`;
+    callBtn.onclick = null;
+  } else {
+    callBtn.removeAttribute('href');
+    callBtn.onclick = event => {
+      event.preventDefault();
+      alert('Customer has not provided a phone number.');
+    };
+  }
+
+  const email = (c.email || '').trim();
+  const emailBtn = $('customerEmailBtn');
+  if (email) {
+    emailBtn.href = `mailto:${email}`;
+    emailBtn.onclick = null;
+  } else {
+    emailBtn.removeAttribute('href');
+    emailBtn.onclick = event => {
+      event.preventDefault();
+      alert('Customer has not provided an email address.');
+    };
+  }
   $('customerModal').classList.remove('hidden');
 }
 
