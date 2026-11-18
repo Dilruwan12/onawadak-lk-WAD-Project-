@@ -1565,7 +1565,7 @@ function setProviderPin(
     L.marker([
       lat,
       lng
-    ])
+    ], { icon: providerPinIcon, title: 'Your service location' })
 
       .addTo(
         providerPickerMap
