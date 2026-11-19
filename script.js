@@ -71,6 +71,7 @@ function updateSelectedServiceCount() {
   if (target) target.textContent = `${count} service${count === 1 ? '' : 's'} selected`;
 }
 $('serviceMultiSelect')?.addEventListener('change', updateSelectedServiceCount);
+$('authForm')?.addEventListener('reset', () => setTimeout(updateSelectedServiceCount, 0));
 
 
 let workers = [];
@@ -981,6 +982,10 @@ $('closeRequest').onclick =
 
   };
 
+requestModal.addEventListener('click', event => {
+  if (event.target === requestModal) requestModal.classList.add('hidden');
+});
+
 
 /* =========================================================
    SEND SERVICE REQUEST
@@ -1217,8 +1222,6 @@ if (!['user', 'worker'].includes(profile.role || 'user')) {
   customerRequestsSection.classList.add('hidden');
   return;
 }
-
-customerRequestsSection.classList.remove('hidden');
 
   customerRequestsSection.classList.remove('hidden');
   customerRequestsList.innerHTML =
@@ -1458,6 +1461,7 @@ function openAuthModal(mode = 'login') {
   authModal.classList.remove('hidden');
   document.body.classList.add('auth-open');
   showAuthForm(mode);
+  updateSelectedServiceCount();
 }
 
 function selectRole(role) {
@@ -1577,7 +1581,7 @@ function setProviderPin(
     L.marker([
       lat,
       lng
-    ])
+    ], { icon: providerPinIcon, title: 'Your service location' })
 
       .addTo(
         providerPickerMap
@@ -1726,7 +1730,9 @@ authModal.addEventListener('click', event => {
 });
 
 document.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && !authModal.classList.contains('hidden')) closeAuthModal();
+  if (event.key !== 'Escape') return;
+  if (!authModal.classList.contains('hidden')) closeAuthModal();
+  if (!requestModal.classList.contains('hidden')) requestModal.classList.add('hidden');
 });
 
 /* =========================================================

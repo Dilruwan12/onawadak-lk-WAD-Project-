@@ -276,9 +276,33 @@ const requesterType =
   $('customerDescription').textContent = r.description || 'No description';
   $('customerAmount').textContent = money(r.paymentAmount ?? r.amount);
 
+  const callBtn = $('customerCallBtn');
+  const emailBtn = $('customerEmailBtn');
   const phone = (c.phone || '').replace(/[^\d+]/g, '');
-  $('customerCallBtn').href = phone ? `tel:${phone}` : '#';
-  $('customerEmailBtn').href = c.email ? `mailto:${c.email}` : '#';
+  const email = (c.email || '').trim();
+
+  if (phone) {
+    callBtn.href = `tel:${phone}`;
+    callBtn.onclick = null;
+  } else {
+    callBtn.removeAttribute('href');
+    callBtn.onclick = event => {
+      event.preventDefault();
+      alert('Customer has not provided a phone number.');
+    };
+  }
+
+  if (email) {
+    emailBtn.href = `mailto:${email}`;
+    emailBtn.onclick = null;
+  } else {
+    emailBtn.removeAttribute('href');
+    emailBtn.onclick = event => {
+      event.preventDefault();
+      alert('Customer has not provided an email address.');
+    };
+  }
+
   $('customerModal').classList.remove('hidden');
 }
 
