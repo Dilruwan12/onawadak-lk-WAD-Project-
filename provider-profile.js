@@ -209,9 +209,9 @@ function openCompleteJobModal(request) {
 }
 
 function closeCompleteJobModal() {
-  $('completeJobModal').classList.add('hidden');
-  $('completeJobForm').reset();
-  $('completeRequestId').value = '';
+  if ($('completeJobModal')) $('completeJobModal').classList.add('hidden');
+  if ($('completeJobForm')) $('completeJobForm').reset();
+  if ($('completeRequestId')) $('completeRequestId').value = '';
 }
 
 $('completeJobForm').addEventListener('submit', async event => {
@@ -443,6 +443,19 @@ $('closeCustomerModal').onclick = () => $('customerModal').classList.add('hidden
 $('customerModal').onclick = e => {
   if (e.target === $('customerModal')) $('customerModal').classList.add('hidden');
 };
+
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape') return;
+  if ($('customerModal') && !$('customerModal').classList.contains('hidden')) {
+    $('customerModal').classList.add('hidden');
+  }
+  if ($('completeJobModal') && !$('completeJobModal').classList.contains('hidden')) {
+    closeCompleteJobModal();
+  }
+  if ($('manageServicesModal') && !$('manageServicesModal').classList.contains('hidden')) {
+    closeServiceManager();
+  }
+});
 
 $('logoutBtn').onclick = async () => {
   if (confirm('Do you want to logout?')) {

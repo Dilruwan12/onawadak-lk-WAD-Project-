@@ -1451,6 +1451,13 @@ const switchAuthText =
 function openAuthModal(mode = 'login') {
   selectRole('user');
   providerLocation = null;
+  if (providerPickerMarker && providerPickerMap) {
+    providerPickerMap.removeLayer(providerPickerMarker);
+  }
+  providerPickerMarker = null;
+  if ($('providerLocationStatus')) {
+    $('providerLocationStatus').textContent = 'Tap the map to choose your service location.';
+  }
   authModal.classList.remove('hidden');
   document.body.classList.add('auth-open');
   showAuthForm(mode);
@@ -1469,6 +1476,13 @@ function selectRole(role) {
 }
 
 function closeAuthModal() {
+  if (providerPickerMarker && providerPickerMap) {
+    providerPickerMap.removeLayer(providerPickerMarker);
+  }
+  providerPickerMarker = null;
+  if ($('providerLocationStatus')) {
+    $('providerLocationStatus').textContent = 'Tap the map to choose your service location.';
+  }
   authModal.classList.add('hidden');
   document.body.classList.remove('auth-open');
 }
