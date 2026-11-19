@@ -71,6 +71,7 @@ function updateSelectedServiceCount() {
   if (target) target.textContent = `${count} service${count === 1 ? '' : 's'} selected`;
 }
 $('serviceMultiSelect')?.addEventListener('change', updateSelectedServiceCount);
+$('authForm')?.addEventListener('reset', () => setTimeout(updateSelectedServiceCount, 0));
 
 
 let workers = [];
@@ -1453,6 +1454,7 @@ function openAuthModal(mode = 'login') {
   authModal.classList.remove('hidden');
   document.body.classList.add('auth-open');
   showAuthForm(mode);
+  updateSelectedServiceCount();
 }
 
 function selectRole(role) {
