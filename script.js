@@ -322,7 +322,9 @@ function renderWorkers(filter = '') {
 
         workerServiceText.includes(needle) ||
 
-        name.includes(needle);
+        name.includes(needle) ||
+
+        String(worker.location || '').toLowerCase().includes(needle);
 
 
       if (!matches) {
