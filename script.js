@@ -71,6 +71,7 @@ function updateSelectedServiceCount() {
   if (target) target.textContent = `${count} service${count === 1 ? '' : 's'} selected`;
 }
 $('serviceMultiSelect')?.addEventListener('change', updateSelectedServiceCount);
+$('authForm')?.addEventListener('reset', () => setTimeout(updateSelectedServiceCount, 0));
 
 
 let workers = [];
@@ -942,6 +943,12 @@ const requestModal =
 
 
 function openRequest(id) {
+  if (!auth.currentUser) {
+    alert('Please login or register to send a service request.');
+    openAuthModal('login');
+    return;
+  }
+
   selectedWorker = workers.find(worker => worker.id === id);
   if (!selectedWorker) return;
 
@@ -1452,9 +1459,17 @@ const switchAuthText =
 function openAuthModal(mode = 'login') {
   selectRole('user');
   providerLocation = null;
+  if (providerPickerMarker && providerPickerMap) {
+    providerPickerMap.removeLayer(providerPickerMarker);
+  }
+  providerPickerMarker = null;
+  if ($('providerLocationStatus')) {
+    $('providerLocationStatus').textContent = 'Tap the map to choose your service location.';
+  }
   authModal.classList.remove('hidden');
   document.body.classList.add('auth-open');
   showAuthForm(mode);
+  updateSelectedServiceCount();
 }
 
 function selectRole(role) {
@@ -1469,6 +1484,13 @@ function selectRole(role) {
 }
 
 function closeAuthModal() {
+  if (providerPickerMarker && providerPickerMap) {
+    providerPickerMap.removeLayer(providerPickerMarker);
+  }
+  providerPickerMarker = null;
+  if ($('providerLocationStatus')) {
+    $('providerLocationStatus').textContent = 'Tap the map to choose your service location.';
+  }
   authModal.classList.add('hidden');
   document.body.classList.remove('auth-open');
 }

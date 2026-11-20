@@ -209,9 +209,9 @@ function openCompleteJobModal(request) {
 }
 
 function closeCompleteJobModal() {
-  $('completeJobModal').classList.add('hidden');
-  $('completeJobForm').reset();
-  $('completeRequestId').value = '';
+  if ($('completeJobModal')) $('completeJobModal').classList.add('hidden');
+  if ($('completeJobForm')) $('completeJobForm').reset();
+  if ($('completeRequestId')) $('completeRequestId').value = '';
 }
 
 $('completeJobForm').addEventListener('submit', async event => {
@@ -276,8 +276,11 @@ const requesterType =
   $('customerDescription').textContent = r.description || 'No description';
   $('customerAmount').textContent = money(r.paymentAmount ?? r.amount);
 
-  const phone = (c.phone || '').replace(/[^\d+]/g, '');
   const callBtn = $('customerCallBtn');
+  const emailBtn = $('customerEmailBtn');
+  const phone = (c.phone || '').replace(/[^\d+]/g, '');
+  const email = (c.email || '').trim();
+
   if (phone) {
     callBtn.href = `tel:${phone}`;
     callBtn.onclick = null;
@@ -289,8 +292,6 @@ const requesterType =
     };
   }
 
-  const email = (c.email || '').trim();
-  const emailBtn = $('customerEmailBtn');
   if (email) {
     emailBtn.href = `mailto:${email}`;
     emailBtn.onclick = null;
@@ -301,6 +302,7 @@ const requesterType =
       alert('Customer has not provided an email address.');
     };
   }
+
   $('customerModal').classList.remove('hidden');
 }
 
@@ -419,16 +421,24 @@ $('manageServicesForm').addEventListener('submit', async event => {
   }
 });
 
-$('profileBtn').onclick = () =>
-  alert(
-    `Name: ${currentProvider?.name || ''}\n` +
-    `Services: ${providerServices(currentProvider || {}).join(', ')}\n` +
-    `Area: ${currentProvider?.location || ''}\n` +
-    `Phone: ${currentProvider?.phone || ''}\n` +
-    `Rating: ${Number(currentProvider?.reviewCount || 0) ? Number(currentProvider?.rating || 0).toFixed(1) + ' ⭐' : 'New'}`
-  );
+function showProfileDetails() {
+  const ratingText = Number(currentProvider?.reviewCount || 0)
+    ? `${Number(currentProvider?.rating || 0).toFixed(1)} ⭐ (${currentProvider.reviewCount} reviews)`
+    : 'New';
 
-$('viewProfileQuick').onclick = $('profileBtn').onclick;
+  alert(
+    `👤 Provider Profile Details\n\n` +
+    `Name: ${currentProvider?.name || 'Not specified'}\n` +
+    `Services: ${providerServices(currentProvider || {}).join(', ') || 'None'}\n` +
+    `Area: ${currentProvider?.location || 'Not specified'}\n` +
+    `Phone: ${currentProvider?.phone || 'Not specified'}\n` +
+    `Rating: ${ratingText}\n\n` +
+    `To update your services, use "Manage My Services".`
+  );
+}
+
+$('profileBtn').onclick = showProfileDetails;
+$('viewProfileQuick').onclick = showProfileDetails;
 $('homeBtn').onclick = () => location.href = 'index.html';
 
 $('refreshBtn').onclick = async () => {
@@ -441,6 +451,19 @@ $('closeCustomerModal').onclick = () => $('customerModal').classList.add('hidden
 $('customerModal').onclick = e => {
   if (e.target === $('customerModal')) $('customerModal').classList.add('hidden');
 };
+
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape') return;
+  if ($('customerModal') && !$('customerModal').classList.contains('hidden')) {
+    $('customerModal').classList.add('hidden');
+  }
+  if ($('completeJobModal') && !$('completeJobModal').classList.contains('hidden')) {
+    closeCompleteJobModal();
+  }
+  if ($('manageServicesModal') && !$('manageServicesModal').classList.contains('hidden')) {
+    closeServiceManager();
+  }
+});
 
 $('logoutBtn').onclick = async () => {
   if (confirm('Do you want to logout?')) {
