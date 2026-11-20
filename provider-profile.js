@@ -397,16 +397,24 @@ $('manageServicesForm').addEventListener('submit', async event => {
   }
 });
 
-$('profileBtn').onclick = () =>
-  alert(
-    `Name: ${currentProvider?.name || ''}\n` +
-    `Services: ${providerServices(currentProvider || {}).join(', ')}\n` +
-    `Area: ${currentProvider?.location || ''}\n` +
-    `Phone: ${currentProvider?.phone || ''}\n` +
-    `Rating: ${Number(currentProvider?.reviewCount || 0) ? Number(currentProvider?.rating || 0).toFixed(1) + ' ⭐' : 'New'}`
-  );
+function showProfileDetails() {
+  const ratingText = Number(currentProvider?.reviewCount || 0)
+    ? `${Number(currentProvider?.rating || 0).toFixed(1)} ⭐ (${currentProvider.reviewCount} reviews)`
+    : 'New';
 
-$('viewProfileQuick').onclick = $('profileBtn').onclick;
+  alert(
+    `👤 Provider Profile Details\n\n` +
+    `Name: ${currentProvider?.name || 'Not specified'}\n` +
+    `Services: ${providerServices(currentProvider || {}).join(', ') || 'None'}\n` +
+    `Area: ${currentProvider?.location || 'Not specified'}\n` +
+    `Phone: ${currentProvider?.phone || 'Not specified'}\n` +
+    `Rating: ${ratingText}\n\n` +
+    `To update your services, use "Manage My Services".`
+  );
+}
+
+$('profileBtn').onclick = showProfileDetails;
+$('viewProfileQuick').onclick = showProfileDetails;
 $('homeBtn').onclick = () => location.href = 'index.html';
 
 $('refreshBtn').onclick = async () => {
