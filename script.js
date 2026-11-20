@@ -941,6 +941,12 @@ const requestModal =
 
 
 function openRequest(id) {
+  if (!auth.currentUser) {
+    alert('Please login or register to send a service request.');
+    openAuthModal('login');
+    return;
+  }
+
   selectedWorker = workers.find(worker => worker.id === id);
   if (!selectedWorker) return;
 
