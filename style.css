@@ -609,7 +609,7 @@ footer small {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  z-index: 3000;
+  z-index: 20000 !important;
 }
 
 .hidden {
