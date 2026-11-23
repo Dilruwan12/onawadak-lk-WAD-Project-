@@ -2329,6 +2329,29 @@ $('userNameBtn')
   );
 
 
+$('myRequestsNavLink')
+  ?.addEventListener(
+    'click',
+    event => {
+
+      event.preventDefault();
+
+      $('userDropdown')
+        ?.classList
+        .add('hidden');
+
+      const target = $('myRequests');
+      if (target) {
+        target.classList.remove('hidden');
+        target.scrollIntoView({
+          behavior: 'smooth'
+        });
+      }
+
+    }
+  );
+
+
 document
   .addEventListener(
     'click',
